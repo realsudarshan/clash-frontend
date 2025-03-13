@@ -16,7 +16,11 @@ import {
   import { Input } from "@/components/ui/input"
   import { Button } from "@/components/ui/button"
 import Link from "next/link"
-   
+import { useRouter,useSearchParams } from "next/navigation" 
+import axios, { AxiosError } from "axios"
+import { useToast } from "@/hooks/use-toast"
+
+
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -30,6 +34,10 @@ const formSchema = z.object({
 
 })
 export function LoginForm() {
+  const { toast } = useToast()
+  const searchParams = useSearchParams(); // Use search params to access URL query
+  const verified = searchParams.get("verified");
+  const router=useRouter(); 
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
@@ -38,13 +46,26 @@ export function LoginForm() {
         password:""
       },
     })
+    
    
     // 2. Define a submit handler.
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      // Do something with the form values.
-      // ✅ This will be type-safe and validated.
-      console.log(values)
+ 
+ async function onSubmit(values: z.infer<typeof formSchema>) {
+  try {
+   
+const response=await axios.post(`${process.env.NEXT_PUBLIC_BACKENDURI}/api/auth/login`,values);
+
+  }
+  catch (error) {
+    if (error instanceof AxiosError && error.response && error.response.data) {
+      toast( error.response.data );
+    } else if (error instanceof Error) {
+      console.log("General error:", error.message);
+    } else {
+      console.log("An unexpected error occurred:", error);
     }
+  }
+ }
     return  (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">

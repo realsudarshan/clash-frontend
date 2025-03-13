@@ -16,7 +16,9 @@ import {
   import { Input } from "@/components/ui/input"
   import { Button } from "@/components/ui/button"
 import Link from "next/link"
-   
+import axios from "axios"
+import { useRouter } from "next/navigation"
+ 
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -31,6 +33,7 @@ const formSchema = z.object({
 
 })
 export function SignupForm() {
+  const router=useRouter()  
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
@@ -42,10 +45,16 @@ export function SignupForm() {
     })
    
     // 2. Define a submit handler.
-    function onSubmit(values: z.infer<typeof formSchema>) {
+   async function onSubmit(values: z.infer<typeof formSchema>) {
       // Do something with the form values.
       // ✅ This will be type-safe and validated.
-      console.log(values)
+      try {
+        const response=await axios.post(`${process.env.NEXT_PUBLIC_BACKENDURI}/api/auth/register`,values);
+        router.push("/login")
+      } catch (error) {
+        console.error(error)
+        
+      }
     }
     return  (
         <Form {...form}>
